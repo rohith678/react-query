@@ -4,7 +4,10 @@ import { useParams } from 'react-router-dom';
 import Header from '../Header.jsx';
 import {fetchEvent , deleteEvent , queryClient} from '../../utils/Http.jsx';
 import ErrorBlock from '../UI/ErrorBlock.jsx';
+import { useState } from 'react';
+import Modal from '../UI/Modal.jsx'
 export default function EventDetails() {
+  const [isDeleting, setIsDeleting] = useState(false);
   const params = useParams();
   const navigate = useNavigate();
   const {data, isError, error, isFetching} =useQuery({
@@ -20,6 +23,14 @@ export default function EventDetails() {
       navigate("/events");
     }
   })
+
+  function handleStartDelete() {
+    setIsDeleting(true);
+  }
+
+  function handleStopDelete() {
+    setIsDeleting(false);
+  }
 
   const handleDelete = () => {
     mutate({id: params.id})
@@ -44,7 +55,7 @@ export default function EventDetails() {
     <header>
           <h1>{data.title}</h1>
           <nav>
-            <button onClick={handleDelete}>Delete</button>
+            <button onClick={handleStartDelete}>Delete</button>
             <Link to="edit">Edit</Link>
           </nav>
         </header>
@@ -63,6 +74,16 @@ export default function EventDetails() {
 
   return (
     <>
+    {
+    isDeleting && <Modal onClose={handleStopDelete}>
+      <h2>Are you sure?</h2>
+      <p>This action cannot be undone</p>
+      <div className='form-actions'>
+        <button onClick={handleStopDelete} className='button-text'>Cancel</button>
+        <button onClick={handleDelete} className='button'>Delete</button>
+      </div>
+    </Modal>
+    }
       <Outlet />
       <Header>
         <Link to="/events" className="nav-item">
